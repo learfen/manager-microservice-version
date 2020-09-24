@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="alerta">$alert</div>
+    <h3>Subir version</h3>
+    <input id="version">
+    <form ref='uploadForm'
+        style="display:none" 
+        id='uploadForm' 
+        action='/version-file' 
+        method='post' 
+        encType="multipart/form-data">
+        <input type="file" name="sampleFile" />
+        <input type='submit' value='Upload!' />
+    </form>
+    <hr>
+    <h3>Server</h3>
+    <div id="listeners"></div>
+    <a href="/server/start" id="server-start">Start</a>
+    <h3>Versiones existentes</h3>
+    <div id="version-list" class="flex wrap"><a href="/version-back">Volver a la versión anterior</a></div>
+</body>
+<script>
+    let alerta = document.querySelector("#alerta")
+    let version = document.querySelector("#version")
+    let form  = document.querySelector("#uploadForm")
+    let listeners  = document.querySelector("#listeners")
+    let versionList = document.querySelector("#version-list")
+    let versionActiva = $versionActiva
+    let listenerList = `$listeners`.split("(LISTEN)")
+    listenerList.pop()
+    console.log(listenerList)
+    for(let item of listenerList){
+        let div = document.createElement("div")
+        let a = document.createElement("a")
+        let code = item.split("node      ")[1]
+        code = code.split(" ")[0]
+        a.href = "/server/stop/"+code
+        a.append("Detener")
+        div.appendChild(a)
+        div.append(item)
+        listeners.appendChild(div)
+    }
+
+    if(listenerList.length > 1 ){
+        document.querySelector("#server-start").remove()
+    }else{
+        if(alerta.innerHTML == "El server fue encendido<hr>"){
+            setTimeout(() => {
+                location.href = "/"
+            }, 1000);
+        }
+    }
+
+    version.onkeyup = (e)=>{
+        if(e.target.value != ""){
+            form.style.display = "block"
+        }
+    }
+    version.onchange = (e)=>{
+        form.action = '/version-file/'+e.target.value
+    }
+
+    let versiones = "$versiones".split(",")
+    for(let item of versiones){
+        let li = document.createElement("div")
+        let a = document.createElement("a")
+        a.href = "/version-active/"+item
+        a.innerHTML = item
+        a.id="version-"+item.replace(".","")
+        li.appendChild(a)
+        versionList.appendChild(li)
+    }
+    if(alerta.innerHTML != ""){
+        alerta.style = "background-color: #aaa;color:#fff;padding:1rem;margin:.5rem"
+    }
+    if(versionActiva != ""){
+        versionActiva=String(versionActiva).replace(".","")
+        document.querySelector('#version-'+versionActiva).style = "background-color:green;color:#fff"
+    }
+</script>
+<style>
+    body{ font-family: arial; }
+    a{
+        padding: .5rem;
+        text-decoration: none;
+        box-shadow: 1px 1px 3px #333;
+        display: inline-block;
+        margin: 5px .5rem;
+        border-radius: 5px;
+        color: initial;
+        min-width: 4rem;
+        text-align: center;
+    }
+    a:hover{
+        border:1px #666 solid;
+    }
+    .flex{
+        display: flex
+    }
+    .flex.wrap{
+        flex-wrap: wrap;
+    }
+</style>
+</html>
